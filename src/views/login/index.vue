@@ -49,7 +49,13 @@
       </div>
 
     </el-form>
+    // 环境变量的作业
+    // 1.正常公司中 有几个环境
+    // 4个环境  1.开发development 2.测试staging 3.线上 production 4.预发uat
+    // 2.在项目里如何配置这几个环境 通过.ent配置base api
+    // 开发环境的接口前缀 /api  线上环境的接口前缀 /prod-api
   </div>
+
 </template>
 
 <script>
