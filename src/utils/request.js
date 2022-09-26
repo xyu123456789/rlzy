@@ -1,6 +1,6 @@
 // 实现axios二次封装
 import axios from 'axios'
-import Message from 'element-ui'
+import { Message } from 'element-ui'
 // 通过axios创造axios实列
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // 基准地址
