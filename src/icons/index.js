@@ -18,4 +18,4 @@ const requireAll = requireContext => requireContext.keys().map(requireContext)
 // map返回一个新数组 长度和原来一样
 // 映射  -[.dashboard.svg].map(requirecontext)||[]
 requireAll(req)
-console.log(requireAll(req))
+// console.log(requireAll(req))
