@@ -90,4 +90,33 @@ export default {
   .mobile .fixed-header {
     width: 100%;
   }
+  .el-menu {
+      border: none;
+      height: 100%;
+      width: 100% !important;
+      a{
+        li{
+          .svg-icon{
+            color: #fff;
+            font-size: 18px;
+            vertical-align: middle;
+            .icon{
+              color:#fff;
+            }
+          }
+          span{
+            color: #fff;
+          }
+          &:hover{
+            .svg-icon{
+              color: #43a7fe
+            }
+            span{
+              color: #43a7fe;
+            }
+          }
+        }
+      }
+    }
+
 </style>
