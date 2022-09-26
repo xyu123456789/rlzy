@@ -1,7 +1,7 @@
 import router from './router'
 import store from '@/store'
 const whiteList = ['/login', '/404']
-router.beforeEach((to, from, next) => {
+router.beforeEach(async(to, from, next) => {
   // console.log(to)
   // console.log(from)
   // next()
@@ -12,6 +12,9 @@ router.beforeEach((to, from, next) => {
   // 2.2 token 不存在 说明 不处于登录状态
   // 2.2.1 判断一下 是否处于白名单 是的话 直接留在 当前页 否则 跳转到登录页
   if (store.getters.token) {
+    if (!store.state.user.userInfo.userId) {
+      await store.dispatch('user/getUserInfo')
+    }
     if (to.path === '/login') {
       next('/')
     } else {
