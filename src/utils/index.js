@@ -115,3 +115,22 @@ export function param2Obj(url) {
   })
   return obj
 }
+/**
+ * 封装一个函数，找到第一层的函数
+ * @param {*} list 形参
+ * @param {*} rootValue 父元素的id
+ * @returns 用来返回的值
+ */
+export function tranListToTreeData(list, rootValue) {
+  const arr = []
+  list.forEach(ele => {
+    if (ele.pid === rootValue) {
+      const children = tranListToTreeData(list, ele.id)
+      if (children.length) {
+        ele.children = children
+      }
+      arr.push(ele)
+    }
+  })
+  return arr
+}
