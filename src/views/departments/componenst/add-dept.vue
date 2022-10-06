@@ -11,8 +11,9 @@
         <el-input v-model="formData.code" style="width:80%" placeholder="1-50个字符" />
       </el-form-item>
       <el-form-item label="部门负责人" prop="manager">
-        <el-select v-model="formData.manager" style="width:80%" placeholder="请选择">
-          <el-option label="username11" value="username" />
+        <el-select v-model="formData.manager" style="width:80%" placeholder="请选择" @focus="getEmployeeSimple">
+          <!-- 需要循环生成选项   这里做一下简单的处理 显示的是用户名 存的也是用户名-->
+          <el-option v-for="item in peoples" :key="item.id" :label="item.username" :value="item.username" />
         </el-select>
       </el-form-item>
       <el-form-item label="部门介绍" prop="introduce">
@@ -23,15 +24,16 @@
     <el-row slot="footer" type="flex" justify="center">
       <!-- 列被分为24 -->
       <el-col :span="6">
-        <el-button type="primary" size="small">确定</el-button>
-        <el-button size="small">取消</el-button>
+        <el-button v-loading="loading" type="primary" size="small" @click="submit">确定</el-button>
+        <el-button size="small" @click="handleClose">取消</el-button>
       </el-col>
     </el-row>
   </el-dialog>
 </template>
 
 <script>
-import { getDepartments } from '@/api/departments'
+import { getDepartments, addDepartments } from '@/api/departments'
+import { getEmployeeSimple } from '@/api/employees'
 export default {
   name: 'HrsaasAddDept',
   // 通过属性控制组件显隐
@@ -61,9 +63,9 @@ export default {
     const nameCheck = async(rule, value, callback) => {
       // 先要获取最新的组织架构数据
       const { depts } = await getDepartments()
-      console.log(deptstj)
-      const deptstj = depts.filter(ele => ele.pid === this.treeNode.id).some(ele => ele.name === value)
-      deptstj ? callback(new Error(`同级部门下已经有${value}的部门了`)) : callback()
+      // console.log(deptstj)
+      const isRepeat = depts.filter(ele => ele.pid === this.treeNode.id).some(ele => ele.name === value)
+      isRepeat ? callback(new Error(`同级部门下已经有${value}的部门了`)) : callback()
     }
     return {
       formData: {
@@ -91,14 +93,47 @@ export default {
           { required: true, message: '部门介绍必填', trigger: 'blur' },
           { min: 1, max: 300, message: '部门介绍1-300个字符', trigger: 'blur' }
         ]
-      }
+      },
+      peoples: [],
+      loading: false
     }
   },
   methods: {
     handleClose() {
+      // 通知父组件关闭弹窗
       this.$emit('update:showDialog', false)
       //   清空表格中的数据通过表格自带的方法
       this.$refs.addDeptForm.resetFields()
+      this.formData = {
+        name: '', // 部门名称
+        code: '', // 部门编码
+        manager: '', // 部门管理者
+        introduce: '' // 部门介绍
+      }
+    },
+    async  getEmployeeSimple() {
+      // this.peoples = await getEmployeeSimple()
+      const res = await getEmployeeSimple()
+      this.peoples = res
+    },
+    async submit() {
+      try {
+        await this.$refs.addDeptForm.validate()
+        // 确定按钮的loading状态
+        this.loading = true
+        // 因为是添加子部门，所以我们需要将新增的部门pid设置成当前部门的id，新增的部门就成了自己的子部门
+        await addDepartments({ ...this.formData, pid: this.treeNode.id })
+        // 接口新增成功之后 消息提示成功
+        this.$message.success('新增成功')
+        // 刷新父组件的组织架构列表
+        this.$parent.getDepartments()
+        // 关闭弹窗
+        this.handleClose()
+      } catch (error) {
+        console.log(error)
+      } finally {
+        this.loading = false
+      }
     }
 
   }
