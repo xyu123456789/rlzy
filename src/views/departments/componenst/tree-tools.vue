@@ -31,6 +31,7 @@
 
 <script>
 // 该组件需要对外开放属性 外部需要提供一个对象 对象里需要有name  manager
+import { delDepartments } from '@/api/departments'
 export default {
   name: 'HrsaasTreeTooks',
   // props可以用数组来接收数据 也可以用对象来接收
@@ -54,14 +55,25 @@ export default {
   },
   methods: {
     handleCommand(type) {
-      console.log(type)
+      // console.log(type)
       if (type === 'add') {
         // 新增
         this.$emit('addDept', this.treeNode)
       } else if (type === 'edit') {
         // 编辑
+        this.$emit('editDept', this.treeNode)
       } else {
-        // 删除
+        // 删除 实现删除逻辑 二次确认
+        this.$$confirm('是否确定删除该部门', '提示', {
+          type: 'warning'
+        }).then(async res => {
+          // 调用删除接口
+          return delDepartments(this.treeNode.id)
+        }).then(res => {
+          console.log(res)
+          this.$message.success('删除成功')
+          this.$emit('refreshDepts')
+        })
       }
     }
   }

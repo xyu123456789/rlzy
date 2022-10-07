@@ -1,6 +1,6 @@
 <template>
   <!-- 新增部门的弹层 -->
-  <el-dialog title="新增部门" :visible="showDialog" @close="handleClose">
+  <el-dialog :title="title" :visible="showDialog" @close="handleClose">
     <!-- 表单组件  el-form   label-width设置label的宽度   -->
     <!-- 匿名插槽 -->
     <el-form ref="addDeptForm" label-width="120px" :model="formData" :rules="rules">
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { getDepartments, addDepartments } from '@/api/departments'
+import { getDepartments, addDepartments, updateDepartments } from '@/api/departments'
 import { getEmployeeSimple } from '@/api/employees'
 export default {
   name: 'HrsaasAddDept',
@@ -54,8 +54,15 @@ export default {
     const codeCheck = async(rule, value, callback) => {
       // 先要获取最新的组织架构数据
       const { depts } = await getDepartments()
-      console.log(depts)
-      const isRepeat = depts.some(ele => ele.code === value)
+      // console.log(depts)
+      let isRepeat = true
+      if (this.formData.id) {
+        // 编辑模式  因为编辑模式下 不能算自己
+        isRepeat = depts.some(ele => ele.id !== this.formData.id && ele.code === value && value)
+      } else {
+        // 新增模式
+        isRepeat = depts.some(ele => ele.code === value && value) // 这里加一个 value不为空 因为我们的部门有可能没有code
+      }
       isRepeat ? callback(new Error(`组织架构中已经有部门使用${value}编码`)) : callback()
     }
     // 部门名称 同级部门中禁止出现重复部门
@@ -63,8 +70,14 @@ export default {
     const nameCheck = async(rule, value, callback) => {
       // 先要获取最新的组织架构数据
       const { depts } = await getDepartments()
-      // console.log(deptstj)
-      const isRepeat = depts.filter(ele => ele.pid === this.treeNode.id).some(ele => ele.name === value)
+      let isRepeat = true
+      if (this.formData.id) {
+        isRepeat = depts.filter(item => item.pid === this.treeNode.pid && item.id !== this.treeNode.id).some(item => item.name === value)
+        console.log(depts)
+      } else {
+        isRepeat = depts.filter(item => item.pid === this.treeNode.id).some(item => item.name === value)
+      }
+
       isRepeat ? callback(new Error(`同级部门下已经有${value}的部门了`)) : callback()
     }
     return {
@@ -98,6 +111,11 @@ export default {
       loading: false
     }
   },
+  computed: {
+    title() {
+      return this.formData.id ? '编辑部门' : '新增子部门'
+    }
+  },
   methods: {
     handleClose() {
       // 通知父组件关闭弹窗
@@ -112,19 +130,28 @@ export default {
       }
     },
     async  getEmployeeSimple() {
-      // this.peoples = await getEmployeeSimple()
-      const res = await getEmployeeSimple()
-      this.peoples = res
+      this.peoples = await getEmployeeSimple()
+      // const res = await getEmployeeSimple()
+      // this.peoples = res
     },
     async submit() {
       try {
         await this.$refs.addDeptForm.validate()
         // 确定按钮的loading状态
         this.loading = true
+        if (this.formData.id) {
+          // 编辑模式  调用编辑接口
+          await updateDepartments({ ...this.formData })
+        } else {
+          // 新增模式
+          console.log(this.treeNode)
+          await addDepartments({ ...this.formData, pid: this.treeNode.id }) // 调用新增接口 添加父部门的id
+          console.log(1111)
+        }
         // 因为是添加子部门，所以我们需要将新增的部门pid设置成当前部门的id，新增的部门就成了自己的子部门
-        await addDepartments({ ...this.formData, pid: this.treeNode.id })
+        // await addDepartments({ ...this.formData, pid: this.treeNode.id })
         // 接口新增成功之后 消息提示成功
-        this.$message.success('新增成功')
+        this.$message.success(`${this.formData.id ? '编辑' : '新增'}成功`)
         // 刷新父组件的组织架构列表
         this.$parent.getDepartments()
         // 关闭弹窗
