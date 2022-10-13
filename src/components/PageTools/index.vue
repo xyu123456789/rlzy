@@ -28,7 +28,7 @@ export default {
   props: {
     type: {
       type: String,
-      default: 'into',
+      default: 'info',
       validator(value) {
         if (['info', 'success', 'warning', 'error'].includes(value)) {
           return true

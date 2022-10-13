@@ -4,7 +4,7 @@
     <!-- 测试图标 -->
     <!-- <svg-icon icon-class="eye-open" /> -->
     <!-- <svg-icon iconClass="eye-open"></svg-icon> -->
-
+    <!-- <UploadExcel :before-upload="beforeUpload" :on-success="hand" /> -->
   </div>
 </template>
 
@@ -17,6 +17,19 @@ export default {
     ...mapGetters([
       'name'
     ])
+  },
+  methods: {
+    hand(data) {
+      console.log('data', data)
+    },
+    beforeUpload(file) {
+      console.log(file)
+      if (file.size > 1024) {
+        this.$message.error('to Big')
+        return false
+      }
+      return false
+    }
   }
 }
 </script>
