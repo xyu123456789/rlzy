@@ -57,10 +57,42 @@ export function importEmployee(data) {
 }
 
 /** *
- *  读取用户详情的基础信息
+ *  获取员工信息
  * **/
 export function getPersonalDetail(id) {
   return request({
     url: `/employees/${id}/personalInfo`
+  })
+}
+
+/** *
+ *  保存员故基本信息
+ * **/
+export function updatePersonal(data) {
+  return request({
+    url: `/employees/${data.userId}/personalInfo`,
+    method: 'put',
+    data
+  })
+}
+
+/** **
+ * 获取员工列表
+ *
+ * ****/
+export function getJobDetail(id) {
+  return request({
+    url: `/employees/${id}/jobs`
+  })
+}
+
+/**
+ * 保存员工岗位信息
+ * ****/
+export function updateJob(data) {
+  return request({
+    url: `/employees/${data.userId}/jobs`,
+    method: 'put',
+    data
   })
 }

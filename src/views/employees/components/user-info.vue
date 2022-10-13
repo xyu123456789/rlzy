@@ -64,7 +64,7 @@
       <!-- 保存个人信息 -->
       <el-row class="inline-info" type="flex" justify="center">
         <el-col :span="12">
-          <el-button type="primary">保存更新</el-button>
+          <el-button type="primary" @click="saveUserInfo">保存更新</el-button>
           <el-button @click="$router.back()">返回</el-button>
         </el-col>
       </el-row>
@@ -376,7 +376,7 @@
         <!-- 保存员工信息 -->
         <el-row class="inline-info" type="flex" justify="center">
           <el-col :span="12">
-            <el-button type="primary">保存更新</el-button>
+            <el-button type="primary" @click="saveEmployeesInfo">保存更新</el-button>
             <el-button @click="$router.back()">返回</el-button>
           </el-col>
         </el-row>
@@ -387,8 +387,8 @@
 
 <script>
 import EmployeeEnum from '@/api/constant/employees'
-import { getUserDetailById } from '@/api/user.js'
-import { getPersonalDetail } from '@/api/employees'
+import { getUserDetailById, saveUserDetailById } from '@/api/user.js'
+import { getPersonalDetail, updatePersonal } from '@/api/employees'
 export default {
   data() {
     return {
@@ -472,6 +472,22 @@ export default {
     async loadEmployees() {
       const res = await getPersonalDetail(this.userId)
       this.formData = res
+    },
+    async saveEmployeesInfo() {
+      try {
+        await updatePersonal(this.formData)
+        this.$message.success('更新成功')
+      } catch (error) {
+        this.$message.error('更新失败')
+      }
+    },
+    async saveUserInfo() {
+      try {
+        await saveUserDetailById(this.userInfo)
+        this.$message.success('更新成功')
+      } catch (error) {
+        this.$message.error('更新失败')
+      }
     }
   }
 }
